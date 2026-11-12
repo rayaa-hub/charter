@@ -108,6 +108,8 @@ On first launch Charter asks you to **create an owner passcode** (10+ characters
 | `CHARTER_DATA_KEY` | optional | `npm run gen-key` turns on AES-256-GCM encryption at rest |
 | `PAYPAL_WEBHOOK_ID` | optional | Sandbox app > Webhooks (needs a public HTTPS URL, e.g. a tunnel) |
 
+> **Sandbox tip:** create the REST app on a **US** sandbox business account and pay with a **US** sandbox personal account. Sandbox merchant accounts registered in India reject USD orders (`UNSUPPORTED_PAYEE_CURRENCY`).
+
 Without PayPal keys, checkout is disabled with a clear message, and **no payment is ever simulated**. Without an Anthropic key, parsing runs in a mode labelled **heuristic** in the UI.
 
 ### Try the full flow (sandbox)
