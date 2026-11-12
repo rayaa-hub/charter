@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#07080b" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta name="csp-nonce" content="__CSP_NONCE__" />
+  <title>Charter · Spend controls for AI agents</title>
+  <meta name="description" content="Charter turns plain-English spending rules into enforceable policy for AI agents and settles approved purchases through PayPal." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238B7CFF'/%3E%3Cstop offset='1' stop-color='%234F9CFF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='url(%23g)'/%3E%3Cpath d='M21.5 11.2A7 7 0 1 0 21.5 20.8' stroke='white' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='16' r='2.2' fill='white'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="boot" id="boot" aria-label="Loading Charter"><span class="logo" data-logo></span></div>
+
+  <!-- Sign in / first-run setup -->
+  <section class="auth" id="auth" hidden>
+    <div class="auth-brand">
+      <div class="brand"><span class="logo" data-logo></span><span class="brand-name">Charter</span><span class="env-pill">Sandbox</span></div>
+      <div style="position:relative;z-index:1">
+        <h1>Let AI agents spend.<br /><span>Only on your terms.</span></h1>
+        <p class="lede">Write spending rules in plain English. Charter compiles them into enforceable policy, checks every purchase an agent attempts, and settles only approved payments through PayPal.</p>
+        <div class="auth-points">
+          <div class="auth-point"><span class="ic" data-icon="sparkles"></span><div><b>AI compiles, rules decide</b>Claude translates your words into typed rules. A deterministic engine makes every call, so verdicts are reproducible and explainable.</div></div>
+          <div class="auth-point"><span class="ic" data-icon="card"></span><div><b>PayPal-verified money movement</b>Orders are created server-side, captured and re-verified with PayPal before they count toward a budget.</div></div>
+          <div class="auth-point"><span class="ic" data-icon="shield"></span><div><b>Private and secure by design</b>Personal data is redacted before the AI sees it. Agents use hashed keys, the audit log is tamper-evident, and a kill switch freezes all spending instantly.</div></div>
+        </div>
+      </div>
+      <p class="dim sm" style="position:relative;z-index:1">Sandbox environment · no real funds move</p>
+    </div>
+    <div class="auth-form-wrap">
+      <form class="auth-form" id="auth-form" autocomplete="on" novalidate>
+        <div>
+          <h2 id="auth-title">Sign in to Charter</h2>
+          <p class="muted sm" id="auth-sub" style="margin-top:6px">Enter your owner passcode to open the console.</p>
+        </div>
+        <input type="text" name="username" value="owner" autocomplete="username" hidden />
+        <div class="field">
+          <label class="label" for="passcode">Owner passcode</label>
+          <input class="input" id="passcode" name="passcode" type="password" autocomplete="current-password" minlength="10" maxlength="200" required />
+        </div>
+        <div class="field" id="confirm-wrap" hidden>
+          <label class="label" for="passcode2">Confirm passcode</label>
+          <input class="input" id="passcode2" type="password" autocomplete="new-password" minlength="10" maxlength="200" />
+          <div class="strength" aria-hidden="true"><span id="strength"></span></div>
+          <span class="hint" id="strength-hint">At least 10 characters. A passphrase is best.</span>
+        </div>
+        <div class="err" id="auth-err" role="alert"></div>
+        <button class="btn primary lg block" type="submit" id="auth-submit">Sign in</button>
+        <div class="trust">
+          <span data-icon-inline="lock">scrypt-hashed passcode</span>
+          <span data-icon-inline="shield">HttpOnly · SameSite=Strict session</span>
+          <span data-icon-inline="key">CSRF-protected</span>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Console -->
+  <div class="shell" id="shell" hidden>
+    <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+      <div class="sb-brand">
+        <a class="brand" href="#overview"><span class="logo" data-logo></span><span class="brand-name">Charter</span></a>
+        <span class="env-pill">Sandbox</span>
+      </div>
+      <nav class="sb-nav" id="nav">
+        <span class="sb-label">Console</span>
+        <a href="#overview" data-route="overview" title="Overview"><span data-icon="grid"></span><span class="txt">Overview</span></a>
+        <a href="#requests" data-route="requests" title="Requests"><span data-icon="inbox"></span><span class="txt">Requests</span><span class="count" id="nav-pending" hidden></span></a>
+        <a href="#policy" data-route="policy" title="Policy"><span data-icon="file"></span><span class="txt">Policy</span></a>
+        <a href="#agents" data-route="agents" title="Agents"><span data-icon="bot"></span><span class="txt">Agents</span></a>
+        <a href="#payments" data-route="payments" title="Payments"><span data-icon="card"></span><span class="txt">Payments</span></a>
+        <span class="sb-label">Trust</span>
+        <a href="#security" data-route="security" title="Security &amp; privacy"><span data-icon="shield"></span><span class="txt">Security &amp; privacy</span></a>
+      </nav>
+      <div class="sb-foot">
+        <div class="sb-card">
+          <div class="sb-status" id="sb-status"></div>
+        </div>
+        <div class="sb-user">
+          <span class="avatar">OW</span>
+          <div class="who grow"><div style="font-weight:600;font-size:13px">Owner</div><div class="dim xs">Signed in</div></div>
+          <button class="btn ghost icon-btn" id="logout" title="Sign out" aria-label="Sign out"><span data-icon="logout"></span></button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <button class="btn ghost icon-btn menu-btn" id="menu" aria-label="Open navigation"><span data-icon="menu"></span></button>
+        <div class="grow">
+          <h1 id="page-title">Overview</h1>
+          <p id="page-sub"></p>
+        </div>
+        <div class="actions">
+          <button class="btn" id="kill-quick" title="Freeze all agent spending"><span data-icon="zap"></span><span class="txt">Kill switch</span></button>
+          <a class="btn primary" href="#requests" id="new-request"><span data-icon="plus"></span><span class="txt">New request</span></a>
+        </div>
+      </header>
+      <div class="banner" id="kill-banner" hidden>
+        <span data-icon="alert"></span>
+        <div class="grow"><b>Kill switch engaged.</b> All agent spending is frozen: new requests are blocked and no PayPal orders can be created.</div>
+        <button class="btn sm danger" data-action="kill-off">Release</button>
+      </div>
+      <main class="page" id="page" tabindex="-1"></main>
+    </div>
+  </div>
+
+  <div id="modal-root"></div>
+  <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

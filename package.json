@@ -1,0 +1,21 @@
+{
+  "name": "charter",
+  "version": "1.0.0",
+  "description": "Charter: plain-English spending constitutions for AI agents, enforced before money moves through PayPal.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.6"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server/index.js",
+    "dev": "node --watch --env-file-if-exists=.env server/index.js",
+    "test": "node --test test/",
+    "gen-key": "node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "express": "^5.1.0"
+  }
+}
