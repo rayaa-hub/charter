@@ -640,12 +640,17 @@ function actionBox(r) {
   }
 }
 
+// Load the PayPal SDK exactly once per client/currency. Two concurrent loads would put two SDK
+// copies on the page, and the second one destroys the first one's buttons ("zoid destroyed all components").
+let paypalLoad = null;
 function loadPayPal(currency) {
   const key = `${state.config.paypal.clientId}:${currency}`;
   if (state.paypalKey === key && window.paypal) return Promise.resolve();
+  if (paypalLoad?.key === key) return paypalLoad.promise;
   $$('script[data-paypal]').forEach((s) => s.remove());
   delete window.paypal;
-  return new Promise((resolve, reject) => {
+  state.paypalKey = null;
+  const promise = new Promise((resolve, reject) => {
     const s = document.createElement('script');
     s.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(state.config.paypal.clientId)}&currency=${encodeURIComponent(currency)}&intent=capture&components=buttons`;
     s.dataset.paypal = '1';
@@ -658,11 +663,17 @@ function loadPayPal(currency) {
     s.onerror = () => reject(new Error('Could not load PayPal checkout. Check your connection or allow paypal.com in content blockers.'));
     document.head.appendChild(s);
   });
+  paypalLoad = { key, promise };
+  promise.catch(() => {}).finally(() => {
+    if (paypalLoad?.promise === promise) paypalLoad = null;
+  });
+  return promise;
 }
 
-async function mountPayPal(r) {
+async function mountPayPal(r, attempt = 0) {
   const slot = $('#paypal-slot');
-  if (!slot) return;
+  if (!slot || slot.dataset.mounting) return;
+  slot.dataset.mounting = '1';
   try {
     await loadPayPal(r.request.currency);
     if (!document.body.contains(slot) || state.current !== r.id) return;
@@ -710,6 +721,11 @@ async function mountPayPal(r) {
       })
       .render(slot);
   } catch (e) {
+    if (!document.body.contains(slot)) return; // a newer render replaced this panel; nothing to show
+    if (/zoid destroyed/i.test(e.message) && attempt < 2) {
+      delete slot.dataset.mounting;
+      return setTimeout(() => mountPayPal(r, attempt + 1), 400);
+    }
     slot.innerHTML = `<div class="loading" style="color:#b91c1c">${esc(e.message)}</div>`;
   }
 }
